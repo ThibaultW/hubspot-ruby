@@ -11,6 +11,7 @@ module Hubspot
     DEAL_PATH = "/deals/v1/deal/:deal_id"
     RECENT_UPDATED_PATH = "/deals/v1/deal/recent/modified"
     UPDATE_DEAL_PATH = '/deals/v1/deal/:deal_id'
+    ASSOCIATED_DEAL_PATH = '/deals/v1/deal/associated/:object_type/:object_id/paged'
 
     attr_reader :properties
     attr_reader :portal_id
@@ -41,6 +42,16 @@ module Hubspot
         new(response)
       end
 
+      def find_ids_associated_with(object_type, object_id)
+        response = Hubspot::Connection.get_json(
+          ASSOCIATED_DEAL_PATH,
+          object_type: object_type, object_id: object_id,
+        )
+        response['deals'].map do |deal|
+          deal['dealId']
+        end
+      end
+
       # Find recent updated deals.
       # {http://developers.hubspot.com/docs/methods/deals/get_deals_modified}
       # @param count [Integer] the amount of deals to return.
@@ -49,7 +60,6 @@ module Hubspot
         response = Hubspot::Connection.get_json(RECENT_UPDATED_PATH, opts)
         response['results'].map { |d| new(d) }
       end
-
     end
 
     # Archives the contact in hubspot
